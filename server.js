@@ -17,6 +17,7 @@ var _ = require('underscore')
 var Bear = require('./app/models/bear');
 var User = require('./app/models/user');
 var Question = require('./app/models/question');
+var Answer = require('./app/models/answer');
 // var Answer = require('./app/models/answer');
 
 app.use('/', express.static(__dirname));
@@ -76,20 +77,55 @@ router_bear.use(function(req, res, next) {
     next();
 });
 
+router_questions.route('/answers')
+    .get(function(req, res) {
+        Answer.find(function(err, answer) {
+            if (err)
+                res.send(err);
+            // Modify response
+            answer = _.map(answer, function(a) {
+                return {
+                    id: a._id,
+                    answer: a.answer,
+                    tips: a.tips,
+                    question_id: a.question_id,
+                    value: a.value
+                };
+            });
+            res.json(answer);
+        });
+    });
+
 router_questions.route('/questions')
     .post(function(req, res) {
 
-        var question = new Question(); // create a new instance of the Bear model
-        question.question = req.body.question; // set the bears name (comes from the request)
 
-        // console.log(req.body);
+        var question = new Question({
+            _id: new mongoose.Types.ObjectId(),
+            question: req.body.question
+        });
 
         // save the bear and check for errors
         question.save(function(err) {
             if (err) {
                 res.send(err);
             };
+            req.body.answers.forEach(function(answer_item) {
+                // body...
+                var answer = new Answer({
+                    answer: answer_item.answer,
+                    tips: answer_item.tips,
+                    question_id: question._id,
+                    value: answer_item.value
+                });
 
+                answer.save(function(err) {
+                    if (err) {
+                        res.send(err);
+                    };
+                    // thats it!
+                });
+            });
             res.json({
                 message: 'Question ' + req.body.question + ' created!'
             });
@@ -100,10 +136,10 @@ router_questions.route('/questions')
             if (err)
                 res.send(err);
             // Modify response
-            question = _.map(question, function(bear) {
+            question = _.map(question, function(q) {
                 return {
-                    id: bear._id,
-                    question: bear.question
+                    id: q._id,
+                    question: q.question
                 };
             });
             res.json(question);

@@ -34,7 +34,7 @@ angular.module('expressPG')
         // $http.post('/someUrl', data, config).then(successCallback, errorCallback);
 
         $scope.postQuestion = function(question) {
-            $http.post('/api/questions', {'question':question})
+            $http.post('/api/questions', question)
                 .then(function(response) {
                     $scope.data = response.data;
                     console.log(response.data);
