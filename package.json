@@ -1,0 +1,25 @@
+{
+  "name": "express-pg",
+  "version": "1.0.0",
+  "description": "testing",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm run",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "bear"
+  ],
+  "author": "Marko Ivanetic",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
+    "bower": "^1.8.2",
+    "express": "^4.16.2",
+    "express-session": "^1.15.6",
+    "mongoose": "^5.0.4",
+    "require": "^2.4.20",
+    "underscore": "^1.8.3"
+  }
+}
