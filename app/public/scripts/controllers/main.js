@@ -31,8 +31,21 @@ angular.module('expressPG')
 
         };
 
+        // $http.post('/someUrl', data, config).then(successCallback, errorCallback);
+
+        $scope.postQuestion = function(question) {
+            $http.post('/api/questions', {'question':question})
+                .then(function(response) {
+                    $scope.data = response.data;
+                    console.log(response.data);
+                }, function(error) {
+                    console.log('Error: ', error);
+                });
+
+        };
+
         $scope.getCrypto = function() {
-            $http.get('/api/test')
+            $http.get('/api/questions')
                 .then(function(response) {
                     $scope.results = response.data;
                     console.log(response.data);

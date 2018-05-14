@@ -16,6 +16,8 @@ var _ = require('underscore')
 
 var Bear = require('./app/models/bear');
 var User = require('./app/models/user');
+var Question = require('./app/models/question');
+// var Answer = require('./app/models/answer');
 
 app.use('/', express.static(__dirname));
 // configure app to use bodyParser()
@@ -48,11 +50,11 @@ const db_options = {
     bufferMaxEntries: 0
 };
 
-mongoose.connect('mongodb://MannaGrad:Mtrunks314@ds233748.mlab.com:33748/testing-db', db_options);
+mongoose.connect('mongodb://MannaGrad:Mtrunks314@ds119070.mlab.com:19070/interview_questions', db_options);
 var db = mongoose.connection;
 
-db.once('open', function() {
-    console.log("Connected to MongoDB");
+db.once('open', function(db) {
+    console.log("Connected to MongoDB:", db);
 })
 db.on('error', function(err) {
     console.log(err);
@@ -63,6 +65,7 @@ db.on('error', function(err) {
 // get an instance of the express Router
 var router_bear = express.Router();
 var router_crypto = express.Router();
+var router_questions = express.Router();
 
 // middleware to use for all requests
 router_bear.use(function(req, res, next) {
@@ -73,15 +76,39 @@ router_bear.use(function(req, res, next) {
     next();
 });
 
-// more routes for our API will happen here
-router_crypto.route('/test')
-    .get(function(req, res) {
-        // https://min-api.cryptocompare.com/data/pricehistorical?fsym=ETH&tsyms=BTC,USD,EUR&ts=1452680400&extraParams=your_app_name
-            request({
-                uri: 'https://min-api.cryptocompare.com/data/pricehistorical?fsym=ETH&tsyms=USD&ts=1452680400&extraParams=your_app_name'
-            }).pipe(res);
-    });
+router_questions.route('/questions')
+    .post(function(req, res) {
 
+        var question = new Question(); // create a new instance of the Bear model
+        question.question = req.body.question; // set the bears name (comes from the request)
+
+        // console.log(req.body);
+
+        // save the bear and check for errors
+        question.save(function(err) {
+            if (err) {
+                res.send(err);
+            };
+
+            res.json({
+                message: 'Question ' + req.body.question + ' created!'
+            });
+        });
+    })
+    .get(function(req, res) {
+        Question.find(function(err, question) {
+            if (err)
+                res.send(err);
+            // Modify response
+            question = _.map(question, function(bear) {
+                return {
+                    id: bear._id,
+                    question: bear.question
+                };
+            });
+            res.json(question);
+        });
+    });
 
 router_bear.route('/bears')
 
@@ -247,8 +274,9 @@ router_user.route('/login')
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
-app.use('/api', router_bear);
-app.use('/api', router_crypto);
+// app.use('/api', router_bear);
+// app.use('/api', router_crypto);
+app.use('/api', router_questions);
 app.use('', router_user);
 
 app.get('/', function(req, res) {
